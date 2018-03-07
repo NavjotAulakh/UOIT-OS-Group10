@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <pthread.h>
-#include <semaphore.h>
 #include <errno.h>
 #include <unistd.h>
 
@@ -13,18 +12,19 @@ int main(void){
     pid_t pid1 = 0;
     // create first child process
     pid1 = fork();
-
+    
+    // error if unable to fork
     if(pid1 == -1){
         fprintf(stderr, "Unable to fork, error %d\n", errno);
         exit(EXIT_FAILURE);
     }
-    // first child process
+    // first child process -> wait 1 second then read the contents of its text file and prints the contents.
     else if(pid1 == 0){
         char read1[256];
         sleep(1);
         file1 = fopen("child1.txt", "r");
         fscanf(file1, "%s", read1);
-        printf("\n%s\n", read1);
+        printf("%s\n", read1);
         fclose(file1);
         return 0;
     }
@@ -37,6 +37,7 @@ int main(void){
             fprintf(stderr, "Unable to fork, error %d\n", errno);
             exit(EXIT_FAILURE);
         }
+        // second child process -> wait 1 second then read the contents of its text file and prints the contents.
         else if(pid2 == 0){
             char read2[256];
             sleep(1);
@@ -46,9 +47,8 @@ int main(void){
             fclose(file2);
             return 0;
         }
-        // master process
+        // master process -> writes two files 'child1.txt' containing the line Child1 and 'child2.txt' containing the line Child2
         else{
-            // open files for writing
             file1 = fopen("child1.txt", "w");
             file2 = fopen("child2.txt", "w");
 
