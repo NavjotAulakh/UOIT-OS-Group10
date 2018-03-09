@@ -5,48 +5,50 @@
 #include <semaphore.h>
 #include <sys/wait.h>
 
-//size of the array
+//Initilize global definitions for constants
 #define SIZE 5
 #define FILENAME_NUM "numbers.txt"
 #define FILENAME_SUM "sum.txt"
 sem_t mutex;
 
 int total_sum = 0;
-char *mode_w = "w", *mode_r = "r";
-int stat;
+char *write_mode = "w", *read_mode = "r";
+int stats;
 
 void *factorial(int dataIn);
 
 int main(void){
-    pthread_t thread[SIZE];
     sem_init(&mutex, 0, 1);
     int num[SIZE];
 
     FILE *fp;
 
-    fp = fopen(FILENAME_NUM, mode_w);
+    fp = fopen(FILENAME_NUM, write_mode);
 
     for (int i = 0; i < SIZE; i++){
-        printf("Enter number %d: ", i + 1);
+        printf("Please enter number %d: ", i + 1);
         scanf("%d", &num[i]);
         fprintf(fp, "%d\n", num[i]);
     }
     fclose(fp);
     
-    //make child process
+    //Create the child process through fork
     pid_t pid = fork();
-
+    // Initialize the mutex to 1 for an binary semaphore and 0 (2nd param) for local
     sem_init(&mutex, 0, 1);
 
-    //child process
+    //If zero then child process else parent
     if(pid == 0){
-        int data[SIZE];
-        FILE *fp = fopen(FILENAME_NUM, mode_r);
 
+        //Initializes the variables, file pointer and threads with size
+        int data[SIZE];
+        FILE *fp = fopen(FILENAME_NUM, read_mode);
         pthread_t thread[SIZE];
+
+        //Read the file and insert data into the data array
         for (int i = 0; i < SIZE; i++){
             fscanf(fp, "%d \n", &data[i]);
-            pthread_create(&thread[i], NULL, (void *(*)(void *)) factorial, (int *) data[i]);
+            pthread_create(&thread[i], NULL, (void *(*)(void *)) factorial, (void *)data[i]);
         }
         fclose(fp);
 
@@ -55,38 +57,35 @@ int main(void){
         }
         sem_destroy(&mutex);
 
-        FILE *fp3 = fopen(FILENAME_SUM, mode_w);
-        fprintf(fp3, "%d", total_sum);
-        fclose(fp3);
+        FILE *f_write = fopen(FILENAME_SUM, write_mode);
+        fprintf(f_write, "%d", total_sum);
+        fclose(f_write);
         
         return 0;
     }
     else if(pid < 0){
-        printf("Forking error \n");
+        printf("Forking Error was Generated\n");
         return 0;
-    }
-    //parent process
-    else{
-  //wait for child process to finish
-        waitpid(pid, &stat, 0);
+    } else {
+        //Waits for the child process to finish before continuing
+        waitpid(pid, &stats, 0);
 
-        if(stat == 0){
+        if(stats == 0){
             int sum;
-            FILE *fp1 = fopen(FILENAME_SUM, mode_r);
-            fscanf(fp1, "%d", &sum);
+            FILE *f_read = fopen(FILENAME_SUM, read_mode);
+            fscanf(f_read, "%d", &sum);
             printf("Sum of all factorials of the five numbers: %d\n", sum);
-            fclose(fp1);
+            fclose(f_read);
         }
     }
 
     return 0;
 }
 
-//factorial function
-void *factorial(int dataIn){
+//Factorial Function
+void *factorial(int dataInput){
     int init = 1;
-
-    for(int i=dataIn; i>0; --i){
+    for(int i=dataInput; i>0; --i){
         init *= i;
     }
 
