@@ -8,21 +8,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
-#define INFILE "processes.txt"
-
-int main(void) {
-	queue *head = NULL;
-	head = malloc(sizeof(node_queue));
-	head->next = NULL;
-
-	delete_pid(12235,head);
-	delete_name("emacs",head);
-	read_file(head);
-	print_list(head);
-
-	return 0;
-}
-
+#define F_NAME "processes.txt"
 typedef struct{
 	char name[256];
     int runtime;
@@ -35,95 +21,65 @@ typedef struct node{
 	proc process;
 	struct node *next;
 }node_queue;
+
 node_queue *queue;
 
-void delete_pid(int pid, struct proc *process) {
-	queue *current = process;
-	struct queue *temp;
+void push (proc new_process);
 
-	while(current != NULL && current->next->process.pid != pid) {
-		current = current->next; 
-	}
-	temp = current->next;
-	 current->next = temp->next;
-	free(temp);
-	return; 
+int main(void) {
+	queue = NULL;
+	queue = malloc(sizeof(node_queue));
+	queue->next = NULL;
+
+	//Initialize the file pointer and open the file to read
+    FILE *filep = fopen(F_NAME, "r");
+    if (filep == NULL)
+    {
+        fprintf(stderr, "File Could Not Be Opened. \n");
+        exit(1);
+    }else{
+        char *read_ln = NULL;
+        size_t len = 0;
+        ssize_t read;
+        proc process_1;
+        while ((read = getline(&read_ln, &len, filep)) != -1)
+        {
+            //Initialize pid to 0 as its not provided in txt file
+            process_1.pid = 0;
+            //Tokenize the content to process
+            char *token = NULL;
+            token = strtok(read_ln, ",\n");
+            strcpy(process_1.name, token);
+            token = strtok(NULL, ", \n");
+            process_1.priority = atoi(token);
+            token = strtok(NULL, ", \n");
+            process_1.runtime = atoi(token);
+            push(process_1);
+        }
+        fclose(filep);
+
+       node_queue *values = queue;
+       values = values -> next;
+
+       printf("%-10s %4s %4s %8s \n", "Process name", "Priority", "PID", "Runtime");
+       while(values != NULL){
+           proc process_1 = values -> process;
+           printf("%-10s %6d %8d %8d \n", process_1.name, process_1.priority, process_1.pid, process_1.runtime);
+           values = values -> next;
+       }
+       free(read_ln);
+       return 0;
+    }
 }
 
-void delete_name(char* name , struct proc *process) {
-	queue *current = process;
-	queue *temp;
-	while(current != NULL && current->next->process.name != name) {
-		current = current->next;
-	}
-		temp = current->next;
-		current->next = temp->next;
-		free(temp);
-		return;
-	}
+//push implemention using learn-c.org linked lists
+void push(proc new_process){
+    node_queue *current = queue;
 
-void push(proc new_process) {
-	node_queue *current = head;
-	proc process = new_process;
-	
-	while(current->next != NULL)
-		current = current->next;
-	
-	current->next = malloc(sizeof(struct queue));
-	current->next->process = process;
-	current->next->next = NULL;
+    while(current -> next != NULL){
+        current = current -> next;
+    }
+    current -> next = (node_queue *) malloc(sizeof(node_queue));
+    current -> next -> process = new_process;
+    current -> next -> next = NULL;
 }
-
-void process_print(struct proc *process_print) {
-	struct proc* process = process_print;
-
-	printf("Name: %s\n", process->name);
-	printf("pid: %d\n", process->pid);
-	printf("priority: %d\n", process->priority);
-	printf("runtime: %d\n", process->runtime);
-	printf("%s\n\n", "-----------------");
-}
-
-void print_list(struct queue *head) {
-	struct queue* current = head;
-
-	while(current->next != NULL) {
-		struct proc process = current->process;
-		process_print(&process);
-		current = current->next;
-	}
-}
-
-void read_file(struct queue *head) {
-	FILE *fp = fopen(INFILE, "r");
-	char line[255];
-	char *token;
-	struct proc *new_process;
-
-	while(fgets(line, sizeof(line), fp) != NULL) {	
-
-		// allocate new proc struct
-		new_process = malloc(sizeof(struct proc));
-		
-		// get name
-		token = strtok(line, ",");
-		strcpy(new_process->name, token);
-		
-		// get priority
-		token = strtok(NULL, ",");
-		sscanf(token, "%d", &new_process->priority);
-
-		// get pid
-		token = strtok(NULL, ",");
-		sscanf(token, "%d", &new_process->pid);
-
-		// get runtime
-		token = strtok(NULL, "\n");
-		sscanf(token, "%d", &new_process->runtime);
-		
-		// add to end of linked list
-		push(head, *new_process);
-	}
-}
-
-
