@@ -15,10 +15,11 @@ int main(void) {
 	head = malloc(sizeof(struct queue));
 	head->next = NULL;
 
-	delete_pid(12235,head);
-	delete_name("emacs",head);
+	
 	read_file(head);
 	print_list(head);
+    delete_pid(12235,head);
+	delete_name("emacs",head);
 
 	return 0;
 }
