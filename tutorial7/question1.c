@@ -11,8 +11,8 @@
 #define INFILE "processes.txt"
 
 int main(void) {
-	struct queue *head = NULL;
-	head = malloc(sizeof(struct queue));
+	queue *head = NULL;
+	head = malloc(sizeof(node_queue));
 	head->next = NULL;
 
 	delete_pid(12235,head);
@@ -23,21 +23,22 @@ int main(void) {
 	return 0;
 }
 
-struct proc {
+typedef struct{
 	char name[256];
     int runtime;
 	int pid;
     int priority;
 	
-};
+}proc;
 
-struct queue {
-	struct proc process;
-	struct queue *next;
-};
+typedef struct node{
+	proc process;
+	struct node *next;
+}node_queue;
+node_queue *queue;
 
 void delete_pid(int pid, struct proc *process) {
-	struct queue *current = process;
+	queue *current = process;
 	struct queue *temp;
 
 	while(current != NULL && current->next->process.pid != pid) {
@@ -50,8 +51,8 @@ void delete_pid(int pid, struct proc *process) {
 }
 
 void delete_name(char* name , struct proc *process) {
-	struct queue *current = process;
-	struct queue *temp;
+	queue *current = process;
+	queue *temp;
 	while(current != NULL && current->next->process.name != name) {
 		current = current->next;
 	}
@@ -61,10 +62,9 @@ void delete_name(char* name , struct proc *process) {
 		return;
 	}
 
-void push(struct queue *head, struct proc new_process) {
-	struct queue *current = head;
-	struct proc process = new_process;
-
+void push(proc new_process) {
+	node_queue *current = head;
+	proc process = new_process;
 	
 	while(current->next != NULL)
 		current = current->next;
