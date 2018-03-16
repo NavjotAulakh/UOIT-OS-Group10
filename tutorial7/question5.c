@@ -175,7 +175,7 @@ proc *pop()
     node_queue *nextNode = NULL;
     if (queue -> next == NULL)
     {
-        printf("in NULL node");
+        printf("in NULL node\n");
         return NULL;
     }
     nextNode = queue -> next -> next;

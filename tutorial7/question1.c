@@ -11,9 +11,7 @@
 #define F_NAME "processes.txt"
 typedef struct{
 	char name[256];
-    int runtime;
-	int pid;
-    int priority;
+    int runtime, pid, priority;
 	
 }proc;
 
@@ -44,8 +42,7 @@ int main(void) {
         proc process_1;
         while ((read = getline(&read_ln, &len, filep)) != -1)
         {
-            //Initialize pid to 0 as its not provided in txt file
-            process_1.pid = 0;
+
             //Tokenize the content to process
             char *token = NULL;
             token = strtok(read_ln, ",\n");
@@ -53,23 +50,26 @@ int main(void) {
             token = strtok(NULL, ", \n");
             process_1.priority = atoi(token);
             token = strtok(NULL, ", \n");
+			process_1.pid = atoi(token);
+            token = strtok(NULL, ", \n");
             process_1.runtime = atoi(token);
             push(process_1);
         }
         fclose(filep);
 
-       node_queue *values = queue;
-       values = values -> next;
+		node_queue *values = queue;
+		values = values -> next;
 
-       printf("%-10s %4s %4s %8s \n", "Process name", "Priority", "PID", "Runtime");
-       while(values != NULL){
-           proc process_1 = values -> process;
-           printf("%-10s %6d %8d %8d \n", process_1.name, process_1.priority, process_1.pid, process_1.runtime);
-           values = values -> next;
-       }
-       free(read_ln);
-       return 0;
-    }
+		printf("%-10s %4s %4s %8s \n", "Process name", "Priority", "PID", "Runtime");
+		while(values != NULL){
+			proc process_1 = values -> process;
+			disp_Process(process_1);
+			printf("%-10s %6d %8d %8d \n", process_1.name, process_1.priority, process_1.pid, process_1.runtime);
+			values = values -> next;
+		}
+		free(read_ln);
+		return 0;
+	}
 }
 
 //push implemention using learn-c.org linked lists
