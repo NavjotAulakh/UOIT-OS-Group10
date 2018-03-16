@@ -1,2 +1,2 @@
-# UOIT-OS-Group10
-Group 10 Tutorial Activities Central Hub
+# UOIT-OS-Group5
+Group 5 Tutorial Activities Central Hub
