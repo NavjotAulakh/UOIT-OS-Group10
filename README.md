@@ -12,9 +12,10 @@ The ' #pragma ' directive is the method specified by the C standard for providin
 
 
 3.	Write the OpenMP #pragma definition to execute a loop in parallel.
-#pragma omp parallel
+#pragma omp parallel num_threads(2){
 #pragma omp for
-For (i=0; i<N; I++){ Perform something}
+For (i=0; i<N; I++) //Perform something
+}
 
 
 4.	 What does the reduction do in the #pragma definition in OpenMP?
